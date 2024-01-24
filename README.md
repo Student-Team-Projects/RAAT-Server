@@ -1,5 +1,4 @@
 # RAAT Server
-
 This is a simple script which runs a desktop environment (for the time being, only [cinnamon DE](https://wiki.archlinux.org/title/cinnamon) is supported) on a virtual display, which can be accessed with a VNC client. 
 This script is meant to be launched by the RAAT android app, but can also be used independently.
 
