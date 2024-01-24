@@ -36,14 +36,19 @@ To list all active VNC sessions:
 raat-connect
 ```
 
-To start a VNC viewer for a session on a given port
+To start a VNC viewer for a session on a given port:
 
 ```
-raat-connect [port]
+raat-connect [rfb port]
 ```
 
-- port - a port for communication on which the server is listening
+- rfb port - a port for communication on which the server is listening
 
+If you want to connect to a VNC session via SSH, remember to open a port for SSH connections, e.g.:
+
+```
+sudo systemctl stat sshd
+```
 
 ## License
 This project is licensed under GPL 3.0.
