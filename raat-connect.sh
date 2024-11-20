@@ -1,30 +1,48 @@
 #!/bin/bash
 
-if (($# > 2))
-then
-    echo "Usage:"
-    echo "raat-connect          - List all vnc servers"
-    echo "raat-connect [port]     - Connect to a vnc server on given port"
+if (($# != 3)); then
+    echo "Usage: raat-server [vnc password] [rfb port] [geometry]"
     exit 1
 fi
 
-ports=($(ss -lptn | grep Xvnc | awk '{split($4, a, ":"); print a[2]}'))
+vnc_password=$1
+rfb_port=$2
+geometry=$3
+display=$((rfb_port - 5900))
 
-if (($# == 0))
-then
-    if [ ${#ports[@]} -eq 0 ]; then
-            echo "There are no active vnc sessions"
-    else
-            echo "There are active sessions on ports:"
-            for port in "${ports[@]}"; do
-                echo "    - $port"
-            done
-    fi
-else
-    echo "${ports[*]} ||| $1"
-    if [[ ${ports[*]} =~ "$1" ]]; then
-        vncviewer 0.0.0.0:$1 &
-    else
-        echo "There is no active session on port $1"
-    fi    
-fi
+config_dir="$HOME/.config/raat-server"
+passwd_file="$config_dir/$rfb_port.passwd"
+
+# Ensure the directory exists
+mkdir -p "$config_dir"
+
+# Generate the password file
+echo "$vnc_password" | vncpasswd -f > "$passwd_file"
+
+# Start the VNC server and wait for it to initialize
+setsid Xvnc -AlwaysShared -geometry "$geometry" -rfbauth "$passwd_file" :$display &
+vnc_pid=$!
+
+echo "Waiting for VNC server to initialize..."
+while ! netstat -tln | grep -q ":$rfb_port"; do
+    sleep 1
+done
+echo "VNC server started on port $rfb_port."
+
+# Set the DISPLAY environment variable and start the LXDE desktop environment
+DISPLAY=:$display setsid startlxde &
+lxde_pid=$!
+
+echo "Waiting for LXDE to initialize..."
+sleep 2
+echo "LXDE started."
+
+# Start the VNC viewer
+vncviewer -passwd "$passwd_file" 0.0.0.0:$rfb_port &
+viewer_pid=$!
+
+echo "Waiting for VNC viewer to initialize..."
+while ! pgrep -f vncviewer > /dev/null; do
+    sleep 1
+done
+echo "VNC viewer launched."
