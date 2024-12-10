@@ -46,7 +46,6 @@ sleep 2
 DISPLAY=:$display setsid $DE_CMD &
 de_pid=$!
 
-# Optionally start a VNC viewer
 vncviewer -passwd "$passwd_file" 0.0.0.0:$rfb_port &
 viewer_pid=$!
 
