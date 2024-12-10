@@ -16,7 +16,7 @@ This is an Arch linux package. To install, run:
 
 ```
 git clone [link to project]
-makepkg -i
+makepkg -si
 ```
 
 ## Usage
@@ -47,7 +47,7 @@ raat-connect [rfb port]
 If you want to connect to a VNC session via SSH, remember to open a port for SSH connections, e.g.:
 
 ```
-sudo systemctl stat sshd
+sudo systemctl status sshd
 ```
 
 ## License
