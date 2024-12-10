@@ -20,6 +20,4 @@ pkill -f "Xvnc.*:$display"
 # Kill leftover desktop environment processes that might still be running
 pkill -f "startlxde.*DISPLAY=:$display"
 pkill -f "startxfce4.*DISPLAY=:$display"
-
-# If you used dbus-run-session, it may have leftover processes too:
 pkill -f "dbus-run-session.*:$display"
