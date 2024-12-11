@@ -8,7 +8,7 @@ arch=('any')
 url="https://github.com/Student-Team-Projects/RAAT-Server"
 license=('GPL')
 groups=()
-depends=('cinnamon' 'tigervnc' 'openssh' 'lxde-common')
+depends=('cinnamon' 'tigervnc' 'openssh' 'lxde-common' 'jq')
 makedepends=()
 checkdepends=()
 optdepends=()
@@ -19,9 +19,9 @@ backup=()
 options=()
 install=
 changelog=
-source=("raat-server.sh" "raat-connect.sh" "raat-close-session.sh")
+source=("raat-server.sh" "raat-connect.sh" "raat-close-session.sh" "raat-server-request.sh")
 noextract=()
-sha256sums=('SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 validpgpkeys=()
 
 package() {
@@ -34,6 +34,10 @@ package() {
     # Install the raat-connect script
     cp "${srcdir}/raat-connect.sh" "${pkgdir}/usr/bin/raat-connect"
     chmod +x "${pkgdir}/usr/bin/raat-connect"
+
+    # Install the raat-server-request script
+    cp "${srcdir}/raat-server-request.sh" "${pkgdir}/usr/bin/raat-server-request"
+    chmod +x "${pkgdir}/usr/bin/raat-server-request"
 
     # Install the raat-close-session script
     cp "${srcdir}/raat-close-session.sh" "${pkgdir}/usr/bin/raat-close-session"
