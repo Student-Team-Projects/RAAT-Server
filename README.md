@@ -20,7 +20,6 @@ makepkg -si
 ```
 
 ## Usage
-# Desktop Session Manager
 
 A command-line tool for managing remote desktop sessions with VNC support.
 The tool supports three main operations:
@@ -55,6 +54,27 @@ raat-server-request get-session-status --rfb_port=<port>
 #### Parameters:
 - `rfb_port`: Port number of the session to check
 
+### To list all active VNC sessions:
+
+```
+raat-connect
+```
+
+### To start a VNC viewer for a session on a given port:
+
+```
+raat-connect [rfb port]
+```
+
+#### Parameters:
+- rfb port - a port for communication on which the server is listening
+
+If you want to connect to a VNC session via SSH, remember to open a port for SSH connections, e.g.:
+
+```
+sudo systemctl status sshd
+```
+
 ## Examples
 
 1. Creating a new session with detailed syntax:
@@ -62,19 +82,24 @@ raat-server-request get-session-status --rfb_port=<port>
 raat-server-request open-session --vnc_password=mysecret --rfb_port=5901 --geometry=1024x768 --de_choice=xfce
 ```
 
-2. Creating a new session with simple syntax:
-```bash
-raat-server-request mysecret 5901 1024x768
-```
-
-3. Terminating a session:
+2. Terminating a session:
 ```bash
 raat-server-request kill-session --rfb_port=5901
 ```
 
-4. Checking session status:
+3. Checking session status:
 ```bash
 raat-server-request get-session-status --rfb_port=5901
+```
+
+4. List all active actions:
+```bash
+raat-connect
+```
+
+5. Start vnc viewer:
+```bash
+raat-connect [rfb port]
 ```
 
 ## Notes
@@ -83,26 +108,6 @@ raat-server-request get-session-status --rfb_port=5901
 - Ensure the chosen RFB port is available and within the recommended range
 - The geometry setting must follow the `WIDTHxHEIGHT` format exactly
 - When using the simple syntax, parameters must be provided in the correct order
-
-To list all active VNC sessions:
-
-```
-raat-connect
-```
-
-To start a VNC viewer for a session on a given port:
-
-```
-raat-connect [rfb port]
-```
-
-- rfb port - a port for communication on which the server is listening
-
-If you want to connect to a VNC session via SSH, remember to open a port for SSH connections, e.g.:
-
-```
-sudo systemctl status sshd
-```
 
 ## License
 This project is licensed under GPL 3.0.
