@@ -99,7 +99,7 @@ raat-connect
 
 5. Start vnc viewer:
 ```bash
-raat-connect [rfb port]
+raat-connect 5901
 ```
 
 ## Notes
