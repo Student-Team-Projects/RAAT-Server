@@ -10,7 +10,7 @@ DE_CHOICE=""
 
 CONFIG_DIR="$HOME/.config/raat-server"
 CONFIG_FILE="$CONFIG_DIR/sessions.json"
-RAAT_CLOSE_SCRIPT="./raat-close-session.sh"  # Adjust path if needed
+RAAT_CLOSE_SCRIPT="raat-close-session"  # Adjust path if needed
 
 usage() {
     echo "Usage:"
@@ -103,7 +103,21 @@ is_session_alive() {
 
 kill_existing_session() {
     local port="$1"
-    setsid "$RAAT_CLOSE_SCRIPT" "$port"
+    echo "Attempting to kill session on port $port using $RAAT_CLOSE_SCRIPT..."
+    # Capture the output and exit status
+    local output
+    if ! output=$(bash "$RAAT_CLOSE_SCRIPT" "$port" 2>&1); then
+        echo "Error: Failed to execute RAAT_CLOSE_SCRIPT on port $port."
+        echo "Details: $output"
+        exit 1
+    fi
+    # Verify that the session is no longer alive
+    if is_session_alive "$port"; then
+        echo "Error: Session on port $port is still alive after attempting to kill it."
+        echo "RAAT_CLOSE_SCRIPT output: $output"
+        exit 1
+    fi
+    echo "Session on port $port killed successfully."
 }
 
 start_new_session() {
@@ -113,7 +127,8 @@ start_new_session() {
     local de_choice="$4"
     
     # This script assumes it runs in background:
-    bash raat-server "$vnc_password" "$rfb_port" "$geometry" "$de_choice"
+    # bash raat-server "$vnc_password" "$rfb_port" "$geometry" "$de_choice"
+    setsid bash raat-server "$vnc_password" "$rfb_port" "$geometry" "$de_choice" >/dev/null 2>&1 &
     # We are not waiting for it, so we return immediately.
 }
 
@@ -121,7 +136,7 @@ if [ "$COMMAND" = "open-session" ]; then
     if [ -z "$VNC_PASSWORD" ] || [ -z "$RFB_PORT" ] || [ -z "$GEOMETRY" ] || [ -z "$DE_CHOICE" ]; then
         usage
     fi
-
+    echo "Opening session with parameters: $VNC_PASSWORD, $RFB_PORT, $GEOMETRY, $DE_CHOICE"
     # Check if session exists
     EXISTING_VNC_PASSWORD=$(get_session_field "$RFB_PORT" "vnc_password")
     EXISTING_RFB_PORT=$(get_session_field "$RFB_PORT" "rfb_port")
@@ -143,18 +158,25 @@ if [ "$COMMAND" = "open-session" ]; then
                 exit 0
             else
                 # Different params or need refresh: kill first
+                echo "Session parameters differ. Terminating the existing session..."
                 kill_existing_session "$RFB_PORT"
             fi
         else
-            # Session not alive but exists in config, kill to cleanup if needed
-            kill_existing_session "$RFB_PORT"
+            # Session not alive but exists in config, remove the old config
+            echo "Session on port $RFB_PORT is not alive. Cleaning up stale session."
+            remove_session "$RFB_PORT"
         fi
     fi
 
     # Start a new session
+    echo "Running set_session..."
     set_session "$RFB_PORT" "$VNC_PASSWORD" "$RFB_PORT" "$GEOMETRY" "$DE_CHOICE"
+    echo "Running start_new_session..."
     start_new_session "$VNC_PASSWORD" "$RFB_PORT" "$GEOMETRY" "$DE_CHOICE"
     echo "Session started."
+    exec 1>&-  # Close stdout
+    exec 2>&-  # Close stderr
+    exit 0
 
 elif [ "$COMMAND" = "kill-session" ]; then
     if [ -z "$RFB_PORT" ]; then
@@ -168,6 +190,7 @@ elif [ "$COMMAND" = "kill-session" ]; then
     kill_existing_session "$RFB_PORT"
     remove_session "$RFB_PORT"
     echo "Session killed."
+    exit 0
 
 elif [ "$COMMAND" = "get-session-status" ]; then
     if [ -z "$RFB_PORT" ]; then
@@ -183,8 +206,9 @@ elif [ "$COMMAND" = "get-session-status" ]; then
     else
         echo "Session not alive."
     fi
-
+    exit 0
 else
     echo "Unknown command: $COMMAND"
     usage
+    exit 1
 fi
