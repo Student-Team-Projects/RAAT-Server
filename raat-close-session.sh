@@ -16,8 +16,8 @@ display=$((rfb_port - 5900))
 
 # --- CLEANUP SECTION ---
 # Kill any leftover Xvnc processes on this display
-pkill -f "Xvnc.*:$display"
+pkill -f "Xvnc.*:$display" || true
 # Kill leftover desktop environment processes that might still be running
-pkill -f "startlxde.*DISPLAY=:$display"
-pkill -f "startxfce4.*DISPLAY=:$display"
-pkill -f "dbus-run-session.*:$display"
+pkill -f "startlxde.*DISPLAY=:$display" || true
+pkill -f "startxfce4.*DISPLAY=:$display" || true
+pkill -f "dbus-run-session.*:$display" || true

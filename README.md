@@ -1,6 +1,6 @@
 # RAAT Server
 
-This is a simple script which runs a desktop environment (for the time being, only [LXDE](https://wiki.archlinux.org/title/LXDE) is supported) on a virtual display, which can be accessed with a VNC client. 
+This is a simple script which runs a desktop environment (for the time being, only [LXDE](https://wiki.archlinux.org/title/LXDE) and [XFCE](https://wiki.archlinux.org/title/XFCE) is supported) on a virtual display, which can be accessed with a VNC client. 
 This script is meant to be launched by the RAAT android app, but can also be used independently.
 
 ## Name
@@ -20,28 +20,53 @@ makepkg -si
 ```
 
 ## Usage
-To start a VNC session:
 
+A command-line tool for managing remote desktop sessions with VNC support.
+The tool supports three main operations:
+
+### Opening a New Session
+
+```bash
+raat-server-request open-session --vnc_password=<pass> --rfb_port=<port> --geometry=<WxH> --de_choice=<lxde|xfce>
 ```
-raat-server [vnc password] [rfb port] [geometry]
+
+#### Parameters:
+- `vnc_password`: Password for VNC client authentication
+- `rfb_port`: Port number for RFB (Remote Framebuffer) protocol communication (recommended range: 5901-5909)
+- `geometry`: Display resolution in format `WIDTHxHEIGHT` (e.g., `800x600`)
+- `de_choice`: Desktop environment choice (`lxde` or `xfce`)
+
+### Killing an Existing Session
+
+```bash
+raat-server-request kill-session --rfb_port=<port>
 ```
 
-- vnc password - password which will be used by the vnc client to access the remote desktop
-- rfb port - port for communication, typically within the range (5901-5909)
-- geometry - a string of format \[width\]x\[height\], e.g. 800x600
+#### Parameters:
+- `rfb_port`: Port number of the session to terminate
 
-To list all active VNC sessions:
+### Checking Session Status
+
+```bash
+raat-server-request get-session-status --rfb_port=<port>
+```
+
+#### Parameters:
+- `rfb_port`: Port number of the session to check
+
+### To list all active VNC sessions:
 
 ```
 raat-connect
 ```
 
-To start a VNC viewer for a session on a given port:
+### To start a VNC viewer for a session on a given port:
 
 ```
 raat-connect [rfb port]
 ```
 
+#### Parameters:
 - rfb port - a port for communication on which the server is listening
 
 If you want to connect to a VNC session via SSH, remember to open a port for SSH connections, e.g.:
@@ -49,6 +74,40 @@ If you want to connect to a VNC session via SSH, remember to open a port for SSH
 ```
 sudo systemctl status sshd
 ```
+
+## Examples
+
+1. Creating a new session with detailed syntax:
+```bash
+raat-server-request open-session --vnc_password=mysecret --rfb_port=5901 --geometry=1024x768 --de_choice=xfce
+```
+
+2. Terminating a session:
+```bash
+raat-server-request kill-session --rfb_port=5901
+```
+
+3. Checking session status:
+```bash
+raat-server-request get-session-status --rfb_port=5901
+```
+
+4. List all active actions:
+```bash
+raat-connect
+```
+
+5. Start vnc viewer:
+```bash
+raat-connect 5901
+```
+
+## Notes
+
+- Always use secure passwords for VNC authentication
+- Ensure the chosen RFB port is available and within the recommended range
+- The geometry setting must follow the `WIDTHxHEIGHT` format exactly
+- When using the simple syntax, parameters must be provided in the correct order
 
 ## License
 This project is licensed under GPL 3.0.
